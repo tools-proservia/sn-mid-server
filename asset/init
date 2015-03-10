@@ -11,13 +11,6 @@ SN_USER=${SN_USER:-}
 SN_PASSWD=${SN_PASSWD:-}
 SN_MID_NAME=${SN_MID_NAME:-}
 
-# Default configuration for Java
-#WP_NAME=${WP_NAME:-snc_mid}
-#WP_DISPLAYNAME=${WP_DISPLAYNAME:-ServiceNowMID01}
-#WP_JAVA_COMMAND=${WP_JAVA_COMMAND:-jre/bin/java}
-#WP_JAVA_INITMEMORY=${WP_JAVA_INITMEMORY:-10}
-#WP_JAVA_MAXMEMORY=${WP_JAVA_MAXMEMORY:-512}
-
 checkConf () {
   if [ ! -e $CONF_FILE ]
     then
