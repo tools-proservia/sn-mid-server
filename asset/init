@@ -1,0 +1,83 @@
+#!/bin/bash
+set -e
+
+MID_HOME="/opt/agent"
+CONF_FILE="${MID_HOME}/config.xml"
+CONF_FILE_ORIGIN="/opt/config.xml"
+
+# Mandatory ENV
+SN_URL=${SN_URL:-}
+SN_USER=${SN_USER:-}
+SN_PASSWD=${SN_PASSWD:-}
+SN_MID_NAME=${SN_MID_NAME:-}
+
+# Default configuration for Java
+#WP_NAME=${WP_NAME:-snc_mid}
+#WP_DISPLAYNAME=${WP_DISPLAYNAME:-ServiceNowMID01}
+#WP_JAVA_COMMAND=${WP_JAVA_COMMAND:-jre/bin/java}
+#WP_JAVA_INITMEMORY=${WP_JAVA_INITMEMORY:-10}
+#WP_JAVA_MAXMEMORY=${WP_JAVA_MAXMEMORY:-512}
+
+checkConf () {
+  if [ ! -e $CONF_FILE ]
+    then
+      cp $CONF_FILE_ORIGIN $CONF_FILE
+      generateConf
+  fi
+}
+
+generateConf () {
+  # Set config
+  sed 's/YOUR_MIDSERVER_NAME_GOES_HERE/'"${SN_MID_NAME}"'/' -i $CONF_FILE
+  sed 's/YOUR_INSTANCE_USER_NAME_HERE/'"${SN_USER}"'/' -i $CONF_FILE
+  sed 's/YOUR_INSTANCE_PASSWORD_HERE/'"${SN_PASSWD}"'/' -i $CONF_FILE
+  sed 's/YOUR_INSTANCE/'"${SN_URL}"'/' -i $CONF_FILE
+}
+
+midStart () {
+  checkConf
+  # start supervisord
+  echo "Starting supervisord..."
+  exec /usr/bin/supervisord -c /opt/supervisord.conf
+}
+
+midSetup () {
+  checkConf
+  cat $CONF_FILE
+  echo ""
+}
+
+midHelp () {
+  echo "Available options:"
+  echo " mid:start          - Starts the mid server (default)"
+  echo " mid:setup          - Generate config.xml"
+  echo " mid:help           - Displays the help"
+  echo " [command]          - Execute the specified linux command eg. bash."
+}
+
+case "$1" in
+  mid:start)
+    midStart
+    ;;
+  mid:setup)
+    midSetup
+    ;;
+  mid:help)
+    midHelp
+    ;;
+  *)
+    if [ -x $1 ]; then
+      $1
+    else
+      prog=$(which $1)
+      if [ -n "${prog}" ] ; then
+        shift 1
+        $prog $@
+      else
+        midHelp
+      fi
+    fi
+    ;;
+esac
+
+exit 0
